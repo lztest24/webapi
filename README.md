@@ -15,7 +15,11 @@ Simply clone the repo and launch the `WebApi` project, e.g. using `dotnet watch 
 
 Note regarding test data
 ------------------------
-The `WebApi` project contains an initial migration to seed the DB with randomized test data. If for some reason they are not to your liking, you may recreate them by running the following commands from inside the `WebApi` project folder:
+The `WebApi` project contains an initial migration to seed the DB with randomized test data. If for some reason they are not to your liking, you may recreate them by running the following **from inside the `WebApi` project folder**:
+
+> [!CAUTION]
+> The commands below __have destructive effects__. Triple check that you are really **inside the `WebApi` project folder**.
+
 ```
 dotnet ef database update 0
 dotnet ef migrations remove
