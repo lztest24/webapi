@@ -9,7 +9,7 @@ Cool, thanks!
 
 How to run
 ----------
-Simply clone the repo and launch the `WebApi` project, e.g. using `dotnet watch run`. The Swagger page should be displayed shortly. If it is not, check build output for the URL the API is listening on and navigate to `<the aforementioned URL>/swagger` in your favorite browser.
+Simply clone the repo and launch the `WebApi` project, e.g. using `dotnet watch run`. The Swagger page should be displayed shortly. If it is not, check build output for the URL the API is listening on and navigate to `<the://aforementioned:URL>/swagger` in your favorite browser.
 > [!IMPORTANT]  
 > You will most likely want to modify the connection string in `appsettings.json` with values pertinent to your SQL Server instance. The default one will certainly not work for you.
 
