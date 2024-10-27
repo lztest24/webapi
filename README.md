@@ -9,7 +9,7 @@ Cool, thanks!
 
 How to run
 ----------
-Simply clone the repo, edit the connection string in `appsettings.json` to point to a testing DB, apply the initial migration with `dotnet ef database update` and launch the `WebApi` project, e.g. using `dotnet watch run`. The Swagger page&nbsp;should be displayed shortly. If it is not, check build output for the URL the API is listening on and navigate to it (with `/swagger` appended) using the web browser of your choice.
+Simply clone the repo, edit the connection string in `WebApi/appsettings.json` to point to a testing DB, apply the initial migration with `dotnet ef database update` and launch the `WebApi` project, e.g. using `dotnet watch run`. The Swagger page&nbsp;should be displayed shortly. If it is not, check build output for the URL the API is listening on and navigate to it (with `/swagger` appended) using the web browser of your choice.
 > [!IMPORTANT]  
 > As stated above, you will most likely want to modify the connection string in `appsettings.json` with values pertinent to your SQL Server instance. The default one will certainly not work for you.
 
