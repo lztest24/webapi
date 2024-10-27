@@ -26,3 +26,7 @@ dotnet ef migrations remove
 dotnet ef migrations add init
 dotnet ef database update
 ```
+
+Note regarding unit tests
+-------------------------
+The `UnitTests` project contains the (you guessed it) unit tests for the web API, powered by [xUnit](https://xunit.net/). They should be automatically picked up by your IDE and can be run in the usual way from a standard test runner interface (checked using [Visual Studio Code](https://code.visualstudio.com/) with the [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) extension).
