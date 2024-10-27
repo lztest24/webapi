@@ -15,7 +15,7 @@ Simply clone the repo and `dotnet watch run`. It should just work.
 
 Note regarding test data
 ------------------------
-The `WebApi` project contains an initial migration to seed the DB with randomized test data. If for some reason they are not to your liking, you may recreate them using the following commands:
+The `WebApi` project contains an initial migration to seed the DB with randomized test data. If for some reason they are not to your liking, you may recreate them by running the following commands from inside the `WebApi` project folder:
 ```
 dotnet ef database update 0
 dotnet ef migrations remove
