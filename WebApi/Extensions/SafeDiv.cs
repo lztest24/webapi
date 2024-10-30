@@ -3,7 +3,7 @@ using System.Globalization;
 using RandomDataGenerator.FieldOptions;
 using RandomDataGenerator.Randomizers;
 
-namespace WebApi.Utility
+namespace WebApi.Extensions
 {
 
     public static class SafeDivision

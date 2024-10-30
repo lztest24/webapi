@@ -3,7 +3,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Interfaces;
 using WebApi.Models;
-using WebApi.Utility;
+using WebApi.Extensions;
 
 namespace WebApi.Services
 {

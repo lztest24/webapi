@@ -2,6 +2,8 @@ using System.Reflection;
 using Asp.Versioning.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ProductContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ProductContext") ?? throw new InvalidOperationException("Connection string 'ProductContext' not found.")));
@@ -11,8 +13,16 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services
     .AddControllers()
-    // .AddNewtonsoftJson()
     .AddXmlDataContractSerializerFormatters();
+
+// builder.Logging.ClearProviders();
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("logs/WebApi.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Services.AddSerilog();
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services

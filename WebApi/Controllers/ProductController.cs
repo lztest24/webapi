@@ -11,7 +11,10 @@ using WebApi.Entities;
 using WebApi.Repositories;
 using AutoMapper;
 using WebApi.Models;
+using WebApi.Extensions;
 using Asp.Versioning;
+using Microsoft.Extensions.Logging;
+using WebApi.Utility;
 
 namespace WebApi.Controllers
 {
@@ -20,11 +23,13 @@ namespace WebApi.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _service;
+        private readonly ILogger _logger;
 
 
-        public ProductController(IProductService service)
+        public ProductController(IProductService service, ILogger<ProductController> logger)
         {
             _service = service;
+            _logger = logger;
         }
 
         /// <summary>
@@ -34,11 +39,12 @@ namespace WebApi.Controllers
         [HttpGet]
         [ApiVersion(1)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
+        public async Task<ActionResult<ProductsDto>> GetProducts()
         {
-            return Ok(
-                await _service.GetProductsAsync()
-            );
+
+            var result = await _service.GetProductsAsync();
+
+            return base.Ok(new ProductsDto { Products = result });
 
         }
 
@@ -58,15 +64,17 @@ namespace WebApi.Controllers
         public async Task<ActionResult<ProductPaginationDto>> GetPaginatedProducts(int page, int? pageSize)
         {
             if (page <= 0 || pageSize <= 0)
+            {
+                _logger.LogError("{loginfo}({@params}) - invalid request", this.GetLogInfo(), new { page, pageSize });
                 return BadRequest();
+            }
 
             if (pageSize == null)
                 pageSize = 10;
 
-            return Ok(
-                await _service.GetProductsAsync(page, pageSize.Value)
-            );
+            var result = await _service.GetProductsAsync(page, pageSize.Value);
 
+            return base.Ok(result);
         }
 
 
@@ -87,32 +95,13 @@ namespace WebApi.Controllers
             var product = await _service.GetProductAsync(id);
             if (product == null)
             {
+                _logger.LogError("{loginfo}({@params}) - product not found", this.GetLogInfo(), new { id });
                 return NotFound();
             }
 
             return Ok(product);
         }
 
-        // [HttpPatch("{id}")]
-        // public async Task<IActionResult> UpdateProductDescription(int id, JsonPatchDocument patchDocument)
-        // {
-        //     var product = await _repository.GetProductAsync(id);
-
-        //     if (product == null)
-        //     {
-        //         return NotFound();
-        //     }
-
-        //     var prodDescPatch = new ProductDescriptionDto { Description = product.Description };
-
-        //     patchDocument.ApplyTo(prodDescPatch);
-
-        //     product.Description = prodDescPatch.Description;
-
-        //     await _repository.SaveChangesAsync();
-
-        //     return NoContent();
-        // }
 
     }
 }

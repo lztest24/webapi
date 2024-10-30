@@ -5,6 +5,7 @@ using AutoMapper;
 using WebApi.Models;
 using SQLitePCL;
 using Asp.Versioning;
+using WebApi.Extensions;
 
 namespace WebApi.Controllers
 {
@@ -13,11 +14,13 @@ namespace WebApi.Controllers
     public class ProductDescriptionController : ControllerBase
     {
         private readonly IProductService _service;
+        private readonly ILogger _logger;
 
 
-        public ProductDescriptionController(IProductService service)
+        public ProductDescriptionController(IProductService service, ILogger<ProductDescriptionController> logger)
         {
             _service = service;
+            _logger = logger;
         }
 
         /// <summary>
@@ -36,19 +39,23 @@ namespace WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateProductDescription(int id, ProductDescriptionDto descriptionDto)
         {
+
             if (id != descriptionDto.Id)
             {
+                _logger.LogError("{loginfo}({@params}) - invalid request", this.GetLogInfo(), new { id, descriptionDto });
                 return BadRequest();
             }
 
             if (!await _service.ProductExists(id))
             {
+                _logger.LogError("{loginfo}({@params}) - product not found", this.GetLogInfo(), new { id, descriptionDto });
                 return NotFound();
             }
 
-            await _service.UpdateProductDescriptionAsync(descriptionDto.Id, descriptionDto.Description);
-
-            return NoContent();
+            if (await _service.UpdateProductDescriptionAsync(descriptionDto.Id, descriptionDto.Description))
+                return NoContent();
+            else
+                return StatusCode(500);
         }
 
     }

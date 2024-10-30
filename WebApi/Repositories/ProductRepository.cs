@@ -2,16 +2,19 @@
 using Microsoft.EntityFrameworkCore;
 using WebApi.Interfaces;
 using WebApi.Entities;
+using WebApi.Extensions;
 
 namespace WebApi.Repositories
 {
     public class ProductRepository : IProductRepository
     {
         private readonly ProductContext _context;
+        private readonly ILogger _logger;
 
-        public ProductRepository(ProductContext context)
+        public ProductRepository(ProductContext context, ILogger<ProductRepository> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger;
         }
         public async Task<Product?> GetProductAsync(int productId)
         {
@@ -37,8 +40,9 @@ namespace WebApi.Repositories
                 product.Description = description;
                 return await SaveChangesAsync();
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogError("{loginfo}({@params}) - exception thrown: {exception}", this.GetLogInfo(), new { productId, description }, ex);
                 return false;
             }
         }
