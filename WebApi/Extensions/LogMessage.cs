@@ -6,9 +6,9 @@ namespace WebApi.Extensions
 {
     public static class LogMessage
     {
-        public static string GetLogInfo(this object controller, [CallerMemberName] string method = "")
+        public static string GetLogInfo(this object type, [CallerMemberName] string method = "")
         {
-            return $"{controller}.{method}";
+            return $"{type}.{method}";
         }
     }
 }

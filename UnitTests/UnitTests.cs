@@ -19,7 +19,7 @@ public class UnitTests
     public async void ProductController_GetProducts_Ok()
     {
         var moq = new Mock<IProductService>();
-        moq.Setup(s => s.GetProductsAsync()).ReturnsAsync(GetMockData());
+        moq.Setup(s => s.GetProductsAsync(new CancellationToken{})).ReturnsAsync(GetMockData());
         var controller = new ProductController(moq.Object, Mock.Of<ILogger<ProductController>>());
 
         var result = await controller.GetProducts();
@@ -36,13 +36,13 @@ public class UnitTests
     public async void ProductController_GetProducts_ProductCount(int count)
     {
         var moq = new Mock<IProductService>();
-        moq.Setup(s => s.GetProductsAsync()).ReturnsAsync(GetMockData(count));
+        moq.Setup(s => s.GetProductsAsync(new CancellationToken{})).ReturnsAsync(GetMockData(count));
         var controller = new ProductController(moq.Object, Mock.Of<ILogger<ProductController>>());
 
-        var result = await controller.GetProducts();
+        var result = await controller.GetProducts(new CancellationToken{});
 
         Assert.IsType<OkObjectResult>(result.Result);
-        Assert.Equal(count, ((result.Result as OkObjectResult)!.Value as IEnumerable<ProductDto>)!.Count());
+        Assert.Equal(count, ((result.Result as OkObjectResult)!.Value as ProductsDto)!.Products.Count());
     }
 
 
@@ -55,7 +55,7 @@ public class UnitTests
     {
         var moq = new Mock<IProductService>();
         var mockData = GetMockData();
-        moq.Setup(s => s.GetProductAsync(id)).ReturnsAsync(mockData.FirstOrDefault(m => m.Id == id));
+        moq.Setup(s => s.GetProductAsync(id, new CancellationToken{})).ReturnsAsync(mockData.FirstOrDefault(m => m.Id == id));
         var controller = new ProductController(moq.Object, Mock.Of<ILogger<ProductController>>());
 
         var result = await controller.GetProduct(id);
@@ -74,7 +74,7 @@ public class UnitTests
     {
         var moq = new Mock<IProductService>();
         var mockData = GetMockData();
-        moq.Setup(s => s.GetProductAsync(id)).ReturnsAsync(mockData.FirstOrDefault(m => m.Id == id));
+        moq.Setup(s => s.GetProductAsync(id, new CancellationToken{})).ReturnsAsync(mockData.FirstOrDefault(m => m.Id == id));
         var controller = new ProductController(moq.Object, Mock.Of<ILogger<ProductController>>());
 
         var result = await controller.GetProduct(id);
@@ -92,7 +92,7 @@ public class UnitTests
     {
         var moq = new Mock<IProductService>();
         var mockData = GetMockDataPaginated(page: page, pageSize: pageSize);
-        moq.Setup(s => s.GetProductsAsync(page, pageSize)).ReturnsAsync(mockData);
+        moq.Setup(s => s.GetProductsAsync(page, pageSize, new CancellationToken{})).ReturnsAsync(mockData);
         var controller = new ProductController(moq.Object, Mock.Of<ILogger<ProductController>>());
 
         var result = await controller.GetPaginatedProducts(page, pageSize);
@@ -110,7 +110,7 @@ public class UnitTests
     {
         var moq = new Mock<IProductService>();
         var mockData = GetMockDataPaginated(count, page, pageSize);
-        moq.Setup(s => s.GetProductsAsync(page, pageSize)).ReturnsAsync(mockData);
+        moq.Setup(s => s.GetProductsAsync(page, pageSize, new CancellationToken{})).ReturnsAsync(mockData);
         var controller = new ProductController(moq.Object, Mock.Of<ILogger<ProductController>>());
 
         var result = await controller.GetPaginatedProducts(page, pageSize);
@@ -131,7 +131,7 @@ public class UnitTests
     {
         var moq = new Mock<IProductService>();
         var mockData = GetMockData();
-        moq.Setup(s => s.ProductExists(productId)).ReturnsAsync(mockData.Any(m => m.Id == productId));
+        moq.Setup(s => s.ProductExists(productId, new CancellationToken{})).ReturnsAsync(mockData.Any(m => m.Id == productId));
         var controller = new ProductDescriptionController(moq.Object, Mock.Of<ILogger<ProductDescriptionController>>());
 
         var result = await controller.UpdateProductDescription(productId, new ProductDescriptionDto { Id = productId, Description = description });
@@ -146,7 +146,7 @@ public class UnitTests
     {
         var moq = new Mock<IProductService>();
         var mockData = GetMockData();
-        moq.Setup(s => s.ProductExists(productId)).ReturnsAsync(mockData.Any(m => m.Id == productId));
+        moq.Setup(s => s.ProductExists(productId, new CancellationToken{})).ReturnsAsync(mockData.Any(m => m.Id == productId));
         var controller = new ProductDescriptionController(moq.Object, Mock.Of<ILogger<ProductDescriptionController>>());
 
         var result = await controller.UpdateProductDescription(productId, new ProductDescriptionDto { Id = productId + 1, Description = description });
@@ -162,9 +162,9 @@ public class UnitTests
     {
         var moq = new Mock<IProductService>();
         var mockData = GetMockData();
-        moq.Setup(s => s.ProductExists(productId)).ReturnsAsync(mockData.Any(m => m.Id == productId));
-        moq.Setup(s => s.GetProductAsync(productId)).ReturnsAsync(mockData.FirstOrDefault(m => m.Id == productId));
-        moq.Setup(s => s.UpdateProductDescriptionAsync(productId, description)).Callback(() => mockData.FirstOrDefault(m => m.Id == productId)!.Description = description).ReturnsAsync(true);
+        moq.Setup(s => s.ProductExists(productId, new CancellationToken{})).ReturnsAsync(mockData.Any(m => m.Id == productId));
+        moq.Setup(s => s.GetProductAsync(productId, new CancellationToken{})).ReturnsAsync(mockData.FirstOrDefault(m => m.Id == productId));
+        moq.Setup(s => s.UpdateProductDescriptionAsync(productId, description, new CancellationToken{})).Callback(() => mockData.FirstOrDefault(m => m.Id == productId)!.Description = description).ReturnsAsync(true);
         var controller1 = new ProductDescriptionController(moq.Object, Mock.Of<ILogger<ProductDescriptionController>>());
         var controller2 = new ProductController(moq.Object, Mock.Of<ILogger<ProductController>>());
 

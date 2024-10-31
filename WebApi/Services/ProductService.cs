@@ -18,38 +18,38 @@ namespace WebApi.Services
             _mapper = mapper;
         }
 
-        public async Task<ProductDto?> GetProductAsync(int productId)
+        public async Task<ProductDto?> GetProductAsync(int productId, CancellationToken token)
         {
-            return _mapper.Map<ProductDto>(await _repo.GetProductAsync(productId));
+            return _mapper.Map<ProductDto>(await _repo.GetProductAsync(productId, token));
         }
 
-        public async Task<IEnumerable<ProductDto>> GetProductsAsync()
+        public async Task<IEnumerable<ProductDto>> GetProductsAsync(CancellationToken token)
         {
-            return _mapper.Map<IEnumerable<ProductDto>>(await _repo.GetProductsAsync());
+            return _mapper.Map<IEnumerable<ProductDto>>(await _repo.GetProductsAsync(token));
         }
-        public async Task<ProductPaginationDto> GetProductsAsync(int page, int pageSize = 10)
+        public async Task<ProductPaginationDto> GetProductsAsync(int page, int pageSize, CancellationToken token)
         {
             var result = new ProductPaginationDto { };
-            result.Products = _mapper.Map<IEnumerable<ProductDto>>(await _repo.GetPaginatedProductsAsync(page, pageSize));
+            result.Products = _mapper.Map<IEnumerable<ProductDto>>(await _repo.GetPaginatedProductsAsync(page, pageSize, token));
 
             result.PaginationMetadata.CurrentPage = page;
             result.PaginationMetadata.PageSize = pageSize;
-            result.PaginationMetadata.TotalRecords = await _repo.GetProductCountAsync();
+            result.PaginationMetadata.TotalRecords = await _repo.GetProductCountAsync(token);
             result.PaginationMetadata.TotalPages = (int)Math.Ceiling(result.PaginationMetadata.TotalRecords.SafeDiv(pageSize));
             result.PaginationMetadata.PreviousPage = page <= 1 ? null : page - 1;
             result.PaginationMetadata.NextPage = result.PaginationMetadata.TotalPages <= page ? null : page + 1;
-            
+
             return result;
         }
 
-        public async Task<bool> ProductExists(int productId)
+        public async Task<bool> ProductExists(int productId, CancellationToken token)
         {
-            return await _repo.ProductExists(productId);
+            return await _repo.ProductExists(productId, token);
         }
 
-        public async Task<bool> UpdateProductDescriptionAsync(int productId, string description)
+        public async Task<bool> UpdateProductDescriptionAsync(int productId, string description, CancellationToken token)
         {
-            return await _repo.UpdateProductDescriptionAsync(productId, description);
+            return await _repo.UpdateProductDescriptionAsync(productId, description, token);
         }
     }
 }

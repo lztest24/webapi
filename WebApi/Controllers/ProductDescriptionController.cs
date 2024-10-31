@@ -37,25 +37,37 @@ namespace WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateProductDescription(int id, ProductDescriptionDto descriptionDto)
+        public async Task<IActionResult> UpdateProductDescription(int id, ProductDescriptionDto descriptionDto, CancellationToken token = default)
         {
-
-            if (id != descriptionDto.Id)
+            try
             {
-                _logger.LogError("{loginfo}({@params}) - invalid request", this.GetLogInfo(), new { id, descriptionDto });
-                return BadRequest();
-            }
+                if (id != descriptionDto.Id)
+                {
+                    _logger.LogError("{loginfo}({@params}) - invalid request", this.GetLogInfo(), new { id, descriptionDto });
+                    return BadRequest();
+                }
 
-            if (!await _service.ProductExists(id))
+                if (!await _service.ProductExists(id, token))
+                {
+                    _logger.LogError("{loginfo}({@params}) - product not found", this.GetLogInfo(), new { id, descriptionDto });
+                    return NotFound();
+                }
+
+                if (await _service.UpdateProductDescriptionAsync(descriptionDto.Id, descriptionDto.Description, token))
+                    return NoContent();
+                else
+                    return StatusCode(500);
+            }
+            catch (TaskCanceledException ex)
             {
-                _logger.LogError("{loginfo}({@params}) - product not found", this.GetLogInfo(), new { id, descriptionDto });
-                return NotFound();
+                _logger.LogWarning("{loginfo}({@params}) - task canceled", this.GetLogInfo(), new { id, descriptionDto });
+                return StatusCode(499);
             }
-
-            if (await _service.UpdateProductDescriptionAsync(descriptionDto.Id, descriptionDto.Description))
-                return NoContent();
-            else
+            catch (Exception ex)
+            {
+                _logger.LogError("{loginfo}({@params}) - exception thrown: {exception}", this.GetLogInfo(), new { id, descriptionDto }, ex);
                 return StatusCode(500);
+            }
         }
 
     }

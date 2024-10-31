@@ -16,49 +16,50 @@ namespace WebApi.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger;
         }
-        public async Task<Product?> GetProductAsync(int productId)
+        public async Task<Product?> GetProductAsync(int productId, CancellationToken token)
         {
-            return await _context.Products.FindAsync(productId);
+            return await _context.Products.FindAsync(productId, token);
         }
 
-        public async Task<IEnumerable<Product>> GetProductsAsync()
+        public async Task<IEnumerable<Product>> GetProductsAsync(CancellationToken token)
         {
-            return await _context.Products.ToListAsync();
+            return await _context.Products.ToListAsync(token);
+
         }
-        public async Task<IEnumerable<Product>> GetPaginatedProductsAsync(int page, int pageSize)
+        public async Task<IEnumerable<Product>> GetPaginatedProductsAsync(int page, int pageSize, CancellationToken token)
         {
             return await _context.Products.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
 
-        public async Task<bool> UpdateProductDescriptionAsync(int productId, string? description)
+        public async Task<bool> UpdateProductDescriptionAsync(int productId, string? description, CancellationToken token)
         {
-            var product = await GetProductAsync(productId);
+            var product = await GetProductAsync(productId, token);
 
             try
             {
                 product.Description = description;
-                return await SaveChangesAsync();
+                return await SaveChangesAsync(token);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError("{loginfo}({@params}) - exception thrown: {exception}", this.GetLogInfo(), new { productId, description }, ex);
                 return false;
             }
         }
 
-        public async Task<int> GetProductCountAsync()
+        public async Task<int> GetProductCountAsync(CancellationToken token)
         {
             return await _context.Products.CountAsync();
         }
-        public async Task<bool> ProductExists(int productId)
+        public async Task<bool> ProductExists(int productId, CancellationToken token)
         {
-            return (await GetProductAsync(productId)) != null;
+            return (await GetProductAsync(productId, token)) != null;
         }
-        
-        public async Task<bool> SaveChangesAsync()
+
+        public async Task<bool> SaveChangesAsync(CancellationToken token)
         {
-            return await _context.SaveChangesAsync() >= 0;
+            return await _context.SaveChangesAsync(token) >= 0;
         }
 
     }
