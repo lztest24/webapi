@@ -34,15 +34,26 @@ namespace WebApi.Repositories
 
         public async Task<bool> UpdateProductDescriptionAsync(int productId, string? description, CancellationToken token)
         {
-            var product = await GetProductAsync(productId, token);
-
             try
             {
-                product.Description = description;
-                return await SaveChangesAsync(token);
+                await _context.Database.BeginTransactionAsync(token);
+
+                var product = await GetProductAsync(productId, token);
+                product!.Description = description;
+
+                var result = await SaveChangesAsync(token);
+                await _context.Database.CommitTransactionAsync(token);
+                return result;
+            }
+            catch (TaskCanceledException ex)
+            {
+                await _context.Database.RollbackTransactionAsync(token);
+                _logger.LogWarning("{loginfo}({@params}) - task canceled", this.GetLogInfo(), new { productId, description });
+                return false;
             }
             catch (Exception ex)
             {
+                await _context.Database.RollbackTransactionAsync(token);
                 _logger.LogError("{loginfo}({@params}) - exception thrown: {exception}", this.GetLogInfo(), new { productId, description }, ex);
                 return false;
             }
