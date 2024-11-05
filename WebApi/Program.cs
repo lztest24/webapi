@@ -1,5 +1,6 @@
 using System.Reflection;
 using Asp.Versioning.ApiExplorer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -59,8 +60,14 @@ builder.Services.AddSwaggerGen(setupAction =>
     }
 });
 
+builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
 
 var app = builder.Build();
+
+app.Use(next => context => {
+    context.Request.EnableBuffering();
+    return next(context);
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

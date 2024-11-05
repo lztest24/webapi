@@ -76,9 +76,15 @@ namespace WebApi.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("{loginfo} - invalid params", this.GetLogInfo(ModelState));
+                    return BadRequest();
+                }
+
                 if (page <= 0 || pageSize <= 0)
                 {
-                    _logger.LogError("{loginfo}({@params}) - invalid request", this.GetLogInfo(), new { page, pageSize });
+                    _logger.LogError("{loginfo} - invalid request", this.GetLogInfo(ModelState));
                     return BadRequest();
                 }
 
@@ -91,12 +97,12 @@ namespace WebApi.Controllers
             }
             catch (TaskCanceledException ex)
             {
-                _logger.LogWarning("{loginfo}({@params}) - task canceled", this.GetLogInfo(), new { page, pageSize });
+                _logger.LogWarning("{loginfo} - task canceled", this.GetLogInfo(ModelState));
                 return StatusCode(499);
             }
             catch (Exception ex)
             {
-                _logger.LogError("{loginfo}({@params}) - exception thrown: {exception}", this.GetLogInfo(), new { page, pageSize }, ex);
+                _logger.LogError("{loginfo} - exception thrown: {exception}", this.GetLogInfo(ModelState), ex);
                 return StatusCode(500);
             }
         }
@@ -118,10 +124,16 @@ namespace WebApi.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("{loginfo} - invalid params", this.GetLogInfo(ModelState));
+                    return BadRequest();
+                }
+
                 var product = await _service.GetProductAsync(id, token);
                 if (product == null)
                 {
-                    _logger.LogError("{loginfo}({@params}) - product not found", this.GetLogInfo(), new { id });
+                    _logger.LogError("{loginfo} - product not found", this.GetLogInfo(ModelState));
                     return NotFound();
                 }
 
@@ -129,12 +141,12 @@ namespace WebApi.Controllers
             }
             catch (TaskCanceledException ex)
             {
-                _logger.LogWarning("{loginfo}({@params}) - task canceled", this.GetLogInfo(), new { id });
+                _logger.LogWarning("{loginfo} - task canceled", this.GetLogInfo(ModelState));
                 return StatusCode(499);
             }
             catch (Exception ex)
             {
-                _logger.LogError("{loginfo}({@params}) - exception thrown: {exception}", this.GetLogInfo(), new { id }, ex);
+                _logger.LogError("{loginfo} - exception thrown: {exception}", this.GetLogInfo(ModelState), ex);
                 return StatusCode(500);
             }
         }

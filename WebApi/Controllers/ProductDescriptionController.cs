@@ -41,15 +41,21 @@ namespace WebApi.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("{loginfo} - invalid params", this.GetLogInfo(await Request.GetRawBodyAsync()));
+                    return BadRequest();
+                }
+
                 if (id != descriptionDto.Id)
                 {
-                    _logger.LogError("{loginfo}({@params}) - invalid request", this.GetLogInfo(), new { id, descriptionDto });
+                    _logger.LogError("{loginfo} - invalid request", this.GetLogInfo(await Request.GetRawBodyAsync()));
                     return BadRequest();
                 }
 
                 if (!await _service.ProductExists(id, token))
                 {
-                    _logger.LogError("{loginfo}({@params}) - product not found", this.GetLogInfo(), new { id, descriptionDto });
+                    _logger.LogError("{loginfo} - product not found", this.GetLogInfo(await Request.GetRawBodyAsync()));
                     return NotFound();
                 }
 
@@ -60,12 +66,12 @@ namespace WebApi.Controllers
             }
             catch (TaskCanceledException ex)
             {
-                _logger.LogWarning("{loginfo}({@params}) - task canceled", this.GetLogInfo(), new { id, descriptionDto });
+                _logger.LogWarning("{loginfo} - task canceled", this.GetLogInfo(await Request.GetRawBodyAsync()));
                 return StatusCode(499);
             }
             catch (Exception ex)
             {
-                _logger.LogError("{loginfo}({@params}) - exception thrown: {exception}", this.GetLogInfo(), new { id, descriptionDto }, ex);
+                _logger.LogError("{loginfo} - exception thrown: {exception}", this.GetLogInfo(await Request.GetRawBodyAsync()), ex);
                 return StatusCode(500);
             }
         }
