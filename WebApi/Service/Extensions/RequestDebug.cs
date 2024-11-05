@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -10,6 +11,9 @@ namespace WebApi.Extensions
     {
         public static async Task<string> GetRawBodyAsync(this HttpRequest request, bool stripWhitespace = true, Encoding encoding = null)
         {
+            if(request?.Body == null)
+                return string.Empty;
+
             if (!request.Body.CanSeek)
                 request.EnableBuffering();
 
@@ -18,7 +22,7 @@ namespace WebApi.Extensions
             var body = await reader.ReadToEndAsync().ConfigureAwait(false);
             request.Body.Position = 0;
             if (stripWhitespace)
-                return System.Text.RegularExpressions.Regex.Replace(body, @"\s", string.Empty);
+                return Regex.Replace(body, @"\s", string.Empty);
             else
                 return body;
         }
