@@ -39,41 +39,28 @@ namespace WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateProductDescription(int id, ProductDescriptionDto descriptionDto, CancellationToken token = default)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    _logger.LogError("{loginfo} - invalid params", this.GetLogInfo(await Request.GetRawBodyAsync()));
-                    return BadRequest();
-                }
-
-                if (id != descriptionDto.Id)
-                {
-                    _logger.LogError("{loginfo} - invalid request", this.GetLogInfo(await Request.GetRawBodyAsync()));
-                    return BadRequest();
-                }
-
-                if (!await _service.ProductExists(id, token))
-                {
-                    _logger.LogError("{loginfo} - product not found", this.GetLogInfo(await Request.GetRawBodyAsync()));
-                    return NotFound();
-                }
-
-                if (await _service.UpdateProductDescriptionAsync(descriptionDto.Id, descriptionDto.Description, token))
-                    return NoContent();
-                else
-                    return StatusCode(500);
+                _logger.LogError("{loginfo} - invalid params", this.GetLogInfo(await Request.GetRawBodyAsync()));
+                return BadRequest();
             }
-            catch (TaskCanceledException ex)
+
+            if (id != descriptionDto.Id)
             {
-                _logger.LogWarning("{loginfo} - task canceled", this.GetLogInfo(await Request.GetRawBodyAsync()));
-                return StatusCode(499);
+                _logger.LogError("{loginfo} - invalid request", this.GetLogInfo(await Request.GetRawBodyAsync()));
+                return BadRequest();
             }
-            catch (Exception ex)
+
+            if (!await _service.ProductExists(id, token))
             {
-                _logger.LogError("{loginfo} - exception thrown: {exception}", this.GetLogInfo(await Request.GetRawBodyAsync()), ex);
+                _logger.LogError("{loginfo} - product not found", this.GetLogInfo(await Request.GetRawBodyAsync()));
+                return NotFound();
+            }
+
+            if (await _service.UpdateProductDescriptionAsync(descriptionDto.Id, descriptionDto.Description!, token))
+                return NoContent();
+            else
                 return StatusCode(500);
-            }
         }
 
     }

@@ -41,22 +41,8 @@ namespace WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<ProductsDto>> GetProducts(CancellationToken token = default)
         {
-            try
-            {
-                var result = await _service.GetProductsAsync(token);
-                return Ok(new ProductsDto { Products = result });
-            }
-            catch (TaskCanceledException ex)
-            {
-                _logger.LogWarning("{loginfo}() - task canceled", this.GetLogInfo());
-                return StatusCode(499);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("{loginfo}() - exception thrown: {exception}", this.GetLogInfo(), ex);
-                return StatusCode(500);
-            }
-
+            var result = await _service.GetProductsAsync(token);
+            return Ok(new ProductsDto { Products = result });
         }
 
 
@@ -74,37 +60,24 @@ namespace WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ProductPaginationDto>> GetPaginatedProducts(int page, int? pageSize, CancellationToken token = default)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    _logger.LogError("{loginfo} - invalid params", this.GetLogInfo(ModelState));
-                    return BadRequest();
-                }
-
-                if (page <= 0 || pageSize <= 0)
-                {
-                    _logger.LogError("{loginfo} - invalid request", this.GetLogInfo(ModelState));
-                    return BadRequest();
-                }
-
-                if (pageSize == null)
-                    pageSize = 10;
-
-                var result = await _service.GetProductsAsync(page, pageSize.Value, token);
-
-                return Ok(result);
+                _logger.LogError("{loginfo} - invalid params", this.GetLogInfo(ModelState));
+                return BadRequest();
             }
-            catch (TaskCanceledException ex)
+
+            if (page <= 0 || pageSize <= 0)
             {
-                _logger.LogWarning("{loginfo} - task canceled", this.GetLogInfo(ModelState));
-                return StatusCode(499);
+                _logger.LogError("{loginfo} - invalid request", this.GetLogInfo(ModelState));
+                return BadRequest();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError("{loginfo} - exception thrown: {exception}", this.GetLogInfo(ModelState), ex);
-                return StatusCode(500);
-            }
+
+            if (pageSize == null)
+                pageSize = 10;
+
+            var result = await _service.GetProductsAsync(page, pageSize.Value, token);
+
+            return Ok(result);
         }
 
 
@@ -122,33 +95,20 @@ namespace WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ProductDto>> GetProduct(int id, CancellationToken token = default)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    _logger.LogError("{loginfo} - invalid params", this.GetLogInfo(ModelState));
-                    return BadRequest();
-                }
+                _logger.LogError("{loginfo} - invalid params", this.GetLogInfo(ModelState));
+                return BadRequest();
+            }
 
-                var product = await _service.GetProductAsync(id, token);
-                if (product == null)
-                {
-                    _logger.LogError("{loginfo} - product not found", this.GetLogInfo(ModelState));
-                    return NotFound();
-                }
+            var product = await _service.GetProductAsync(id, token);
+            if (product == null)
+            {
+                _logger.LogError("{loginfo} - product not found", this.GetLogInfo(ModelState));
+                return NotFound();
+            }
 
-                return Ok(product);
-            }
-            catch (TaskCanceledException ex)
-            {
-                _logger.LogWarning("{loginfo} - task canceled", this.GetLogInfo(ModelState));
-                return StatusCode(499);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("{loginfo} - exception thrown: {exception}", this.GetLogInfo(ModelState), ex);
-                return StatusCode(500);
-            }
+            return Ok(product);
         }
 
 
