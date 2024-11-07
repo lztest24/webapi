@@ -4,13 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using WebApi.Interfaces;
 using WebApi.Middleware;
+using WebApi.Repositories;
+using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ProductContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ProductContext") ?? throw new InvalidOperationException("Connection string 'ProductContext' not found.")));
-builder.Services.AddScoped<WebApi.Interfaces.IProductRepository, WebApi.Repositories.ProductRepository>();
-builder.Services.AddScoped<WebApi.Interfaces.IProductService, WebApi.Services.ProductService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.Decorate<IProductRepository, ProductCacheRepository>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services
@@ -63,11 +67,14 @@ builder.Services.AddSwaggerGen(setupAction =>
 
 builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
 
+builder.Services.AddMemoryCache();
+
 var app = builder.Build();
 
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
-app.Use(next => context => {
+app.Use(next => context =>
+{
     context.Request.EnableBuffering();
     return next(context);
 });
