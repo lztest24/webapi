@@ -67,7 +67,7 @@ namespace WebApi.Repositories
             var result = await _repo.UpdateProductDescriptionAsync(productId, description, token);
             if (result)
             {
-                _cache.Remove(CacheKey.Get(CacheKey.Prefix.PRODUCT));
+                _cache.Remove(CacheKey.Get(CacheKey.Prefix.PRODUCT, productId));
                 foreach (var key in (_cache as MemoryCache)!.Keys)
                 {
                     if ($"{key}".StartsWith($"{CacheKey.Prefix.PRODUCTPAGE}_"))

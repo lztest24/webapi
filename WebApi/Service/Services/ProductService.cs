@@ -23,9 +23,10 @@ namespace WebApi.Services
             return _mapper.Map<ProductDto>(await _repo.GetProductAsync(productId, token));
         }
 
-        public async Task<IEnumerable<ProductDto>> GetProductsAsync(CancellationToken token)
+        public async Task<ProductsDto> GetProductsAsync(CancellationToken token)
         {
-            return _mapper.Map<IEnumerable<ProductDto>>(await _repo.GetProductsAsync(token));
+            var products = _mapper.Map<IEnumerable<ProductDto>>(await _repo.GetProductsAsync(token));
+            return new ProductsDto {Products = products };
         }
         public async Task<ProductPaginationDto> GetProductsAsync(int page, int pageSize, CancellationToken token)
         {

@@ -23,12 +23,12 @@ namespace WebApi.Repositories
 
         public async Task<IEnumerable<Product>> GetProductsAsync(CancellationToken token)
         {
-            return await _context.Products.ToListAsync(token);
+            return await _context.Products.OrderBy(p => p.Id).ToListAsync(token);
 
         }
         public async Task<IEnumerable<Product>> GetPaginatedProductsAsync(int page, int pageSize, CancellationToken token)
         {
-            return await _context.Products.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            return await _context.Products.OrderBy(p => p.Id).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
 

@@ -6,6 +6,7 @@ using WebApi.Models;
 using SQLitePCL;
 using Asp.Versioning;
 using WebApi.Extensions;
+using MediatR;
 
 namespace WebApi.Controllers
 {
@@ -13,13 +14,13 @@ namespace WebApi.Controllers
     [ApiController]
     public class ProductDescriptionController : ControllerBase
     {
-        private readonly IProductService _service;
+        private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
 
-        public ProductDescriptionController(IProductService service, ILogger<ProductDescriptionController> logger)
+        public ProductDescriptionController(IMediator mediator, ILogger<ProductDescriptionController> logger)
         {
-            _service = service;
+            _mediator = mediator;
             _logger = logger;
         }
 
@@ -51,13 +52,13 @@ namespace WebApi.Controllers
                 return BadRequest();
             }
 
-            if (!await _service.ProductExists(id, token))
+            if (!await _mediator.Send(new ProductExistsQuery(id), token))
             {
                 _logger.LogError("{loginfo} - product not found", this.GetLogInfo(await Request.GetRawBodyAsync()));
                 return NotFound();
             }
 
-            if (await _service.UpdateProductDescriptionAsync(descriptionDto.Id, descriptionDto.Description!, token))
+            if (await _mediator.Send(new UpdateProductDescriptionCommand(descriptionDto.Id, descriptionDto.Description!), token))
                 return NoContent();
             else
                 return StatusCode(500);

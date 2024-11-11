@@ -15,6 +15,7 @@ using WebApi.Extensions;
 using Asp.Versioning;
 using Microsoft.Extensions.Logging;
 using WebApi.Utility;
+using MediatR;
 
 namespace WebApi.Controllers
 {
@@ -22,13 +23,12 @@ namespace WebApi.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly IProductService _service;
+        private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
-
-        public ProductController(IProductService service, ILogger<ProductController> logger)
+        public ProductController(IMediator mediator, ILogger<ProductController> logger)
         {
-            _service = service;
+            _mediator = mediator;
             _logger = logger;
         }
 
@@ -41,8 +41,8 @@ namespace WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<ProductsDto>> GetProducts(CancellationToken token = default)
         {
-            var result = await _service.GetProductsAsync(token);
-            return Ok(new ProductsDto { Products = result });
+            var result = await _mediator.Send(new GetProductsQuery { }, token);
+            return Ok(result);
         }
 
 
@@ -75,7 +75,8 @@ namespace WebApi.Controllers
             if (pageSize == null)
                 pageSize = 10;
 
-            var result = await _service.GetProductsAsync(page, pageSize.Value, token);
+            var result = await _mediator.Send(new GetProductPageQuery(page, pageSize.Value), token);
+
 
             return Ok(result);
         }
@@ -101,7 +102,8 @@ namespace WebApi.Controllers
                 return BadRequest();
             }
 
-            var product = await _service.GetProductAsync(id, token);
+            var product = await _mediator.Send(new GetProductQuery(id), token);
+
             if (product == null)
             {
                 _logger.LogError("{loginfo} - product not found", this.GetLogInfo(ModelState));

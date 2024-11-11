@@ -5,7 +5,7 @@ namespace WebApi.Interfaces
 {
     public interface IProductService
     {
-        Task<IEnumerable<ProductDto>> GetProductsAsync(CancellationToken token);
+        Task<ProductsDto> GetProductsAsync(CancellationToken token);
         Task<ProductPaginationDto> GetProductsAsync(int page, int pageSize, CancellationToken token);
         Task<ProductDto?> GetProductAsync(int productId, CancellationToken token);
         Task<bool> UpdateProductDescriptionAsync(int productId, string description, CancellationToken token);
